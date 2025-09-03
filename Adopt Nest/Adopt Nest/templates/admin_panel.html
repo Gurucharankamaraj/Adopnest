@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - AdoptNest</title>
+    <link href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/static/admin_style.css">
+</head>
+<body class="bg-dark">
+    <nav class="navbar navbar-dark bg-primary">
+        <div class="container-fluid">
+            <span class="navbar-brand">
+                <i class="fas fa-shield-alt me-2"></i>AdoptNest Admin Panel
+            </span>
+            <div class="navbar-text">
+                Welcome, {{ session.admin_username }}
+                <a href="/admin/logout" class="btn btn-outline-light btn-sm ms-2">
+                    <i class="fas fa-sign-out-alt me-1"></i>Logout
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid mt-4">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ 'danger' if category == 'error' else 'success' }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <!-- Statistics Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card admin-card bg-warning text-dark">
+                    <div class="card-body text-center">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title">Pending</h5>
+                                <h2 class="stats-number">{{ requests | selectattr('status', 'equalto', 'pending') | list | length }}</h2>
+                            </div>
+                            <i class="fas fa-clock stats-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card admin-card bg-success text-white">
+                    <div class="card-body text-center">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title">Approved</h5>
+                                <h2 class="stats-number">{{ requests | selectattr('status', 'equalto', 'approved') | list | length }}</h2>
+                            </div>
+                            <i class="fas fa-check-circle stats-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card admin-card bg-danger text-white">
+                    <div class="card-body text-center">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title">Rejected</h5>
+                                <h2 class="stats-number">{{ requests | selectattr('status', 'equalto', 'rejected') | list | length }}</h2>
+                            </div>
+                            <i class="fas fa-times-circle stats-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card admin-card bg-info text-white">
+                    <div class="card-body text-center">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="card-title">Total</h5>
+                                <h2 class="stats-number">{{ requests | length }}</h2>
+                            </div>
+                            <i class="fas fa-list stats-icon"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Adoption Requests Table -->
+        <div class="card admin-card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-list-alt me-2"></i>Adoption Requests Management
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if requests %}
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Pet ID</th>
+                                    <th>Request Date</th>
+                                    <th>Status</th>
+                                    <th class="table-actions">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for request in requests %}
+                                <tr class="status-{{ request.status }}">
+                                    <td>{{ request.id }}</td>
+                                    <td>{{ request.name }}</td>
+                                    <td>{{ request.email }}</td>
+                                    <td>{{ request.pet_id }}</td>
+                                    <td>{{ request.request_date.strftime('%Y-%m-%d %H:%M') if request.request_date else 'N/A' }}</td>
+                                    <td>
+                                        <span class="status-indicator"></span>
+                                        <span class="text-capitalize">{{ request.status }}</span>
+                                    </td>
+                                    <td class="action-buttons">
+                                        {% if request.status != 'approved' %}
+                                        <form method="POST" action="/admin/update_request" style="display: inline;">
+                                            <input type="hidden" name="request_id" value="{{ request.id }}">
+                                            <input type="hidden" name="status" value="approved">
+                                            <button type="submit" class="btn btn-success btn-sm btn-action">
+                                                <i class="fas fa-check"></i> Approve
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                        
+                                        {% if request.status != 'rejected' %}
+                                        <form method="POST" action="/admin/update_request" style="display: inline;">
+                                            <input type="hidden" name="request_id" value="{{ request.id }}">
+                                            <input type="hidden" name="status" value="rejected">
+                                            <button type="submit" class="btn btn-danger btn-sm btn-action">
+                                                <i class="fas fa-times"></i> Reject
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                        
+                                        {% if request.status != 'pending' %}
+                                        <form method="POST" action="/admin/update_request" style="display: inline;">
+                                            <input type="hidden" name="request_id" value="{{ request.id }}">
+                                            <input type="hidden" name="status" value="pending">
+                                            <button type="submit" class="btn btn-warning btn-sm btn-action">
+                                                <i class="fas fa-undo"></i> Reset
+                                            </button>
+                                        </form>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">No adoption requests found</h5>
+                        <p class="text-muted">Adoption requests will appear here when users submit them.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row mt-4 mb-4">
+            <div class="col-md-12">
+                <div class="card admin-card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-bolt me-2"></i>Quick Actions
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <a href="/" class="btn btn-outline-primary me-2">
+                            <i class="fas fa-home me-1"></i>Homepage
+                        </a>
+                        <a href="/browse.html" class="btn btn-outline-info me-2">
+                            <i class="fas fa-search me-1"></i>Browse Pets
+                        </a>
+                        <a href="/health.html" class="btn btn-outline-success me-2">
+                            <i class="fas fa-file-medical me-1"></i>Health Records
+                        </a>
+                        <button type="button" class="btn btn-outline-warning" onclick="location.reload()">
+                            <i class="fas fa-sync-alt me-1"></i>Refresh Data
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Add loading state to action buttons
+        document.querySelectorAll('.btn-action').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                this.disabled = true;
+            });
+        });
+    </script>
+</body>
+</html>

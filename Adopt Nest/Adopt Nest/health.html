@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Upload Pet Health Records</title>
+  <link rel="stylesheet" href="health_style.css" />
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      background: url('https://a.storyblok.com/f/152976/2114x796/5c9de8eb65/pet-medical-records-1.png/m/2100x780/filters:format(jpeg):quality(75)') no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+    }
+
+    header {
+      background-color: rgba(255, 145, 77, 0.9);
+      color: white;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    .form-card {
+      background-color: rgba(255, 255, 255, 0.96);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .form-card h2 {
+      margin-top: 0;
+      color: #333;
+      text-align: center;
+      margin-bottom: 1.5rem;
+    }
+
+    label {
+      font-weight: 600;
+      display: block;
+      margin: 0.8rem 0 0.3rem;
+    }
+
+    input[type="text"],
+    input[type="file"] {
+      width: 100%;
+      padding: 0.75rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-bottom: 1.2rem;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      background-color: #ff914d;
+      color: white;
+      font-size: 1rem;
+      border: none;
+      border-radius: 8px;
+      padding: 0.9rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #e67e22;
+    }
+
+    button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .message {
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .file-info {
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 0.5rem;
+    }
+
+    .nav-links {
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      margin: 0 1rem;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      transition: background 0.3s;
+    }
+
+    .nav-links a:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>📁 Upload Pet Health Records</h1>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/browse.html">Browse Pets</a>
+      <a href="/adopt.html">Adopt</a>
+      <a href="/tracker.html">Track</a>
+      <a href="/blog.html">Blog</a>
+      <a href="/admin/login">Admin</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="form-card">
+      <h2>Health Record Submission</h2>
+      <div id="messageContainer"></div>
+      <form id="healthForm" enctype="multipart/form-data">
+        <label for="pet-id">Pet ID *</label>
+        <input type="text" id="pet-id" name="pet-id" placeholder="Enter Pet ID (e.g., P001)" required>
+
+        <label for="file">Upload Vaccination/Medical Record *</label>
+        <input type="file" id="file" name="file" accept=".pdf,.png,.jpg,.jpeg,.doc,.docx" required>
+        <div class="file-info">
+          Supported formats: PDF, PNG, JPG, JPEG, DOC, DOCX (Max size: 16MB)
+        </div>
+
+        <button type="submit" id="submitBtn">Upload Record</button>
+      </form>
+
+      <div style="margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #eee;">
+        <h4>Why Upload Health Records?</h4>
+        <ul style="text-align: left; font-size: 0.9rem; color: #666;">
+          <li>Helps adopters understand the pet's medical history</li>
+          <li>Ensures transparency in the adoption process</li>
+          <li>Provides proof of vaccinations and treatments</li>
+          <li>Facilitates smoother vet transitions</li>
+        </ul>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 PetAdopt Inc.</p>
+  </footer>
+
+  <script>
+    document.getElementById('healthForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData();
+      const petId = document.getElementById('pet-id').value;
+      const file = document.getElementById('file').files[0];
+      
+      if (!petId || !file) {
+        showMessage('Please fill all required fields', 'error');
+        return;
+      }
+      
+      // Validate file size (16MB = 16 * 1024 * 1024 bytes)
+      if (file.size > 16 * 1024 * 1024) {
+        showMessage('File size must be less than 16MB', 'error');
+        return;
+      }
+      
+      formData.append('pet-id', petId);
+      formData.append('file', file);
+      
+      // Show loading state
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Uploading...';
+      
+      fetch('/submit_health_record', {
+        method: 'POST',
+        body: formData
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.message) {
+          showMessage(data.message, 'success');
+          document.getElementById('healthForm').reset();
+        } else {
+          showMessage(data.error || 'Upload failed', 'error');
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        showMessage('Upload failed. Please try again.', 'error');
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Upload Record';
+      });
+    });
+    
+    function showMessage(message, type) {
+      const container = document.getElementById('messageContainer');
+      container.innerHTML = `<div class="message ${type}">${message}</div>`;
+      
+      // Auto hide after 5 seconds
+      setTimeout(() => {
+        container.innerHTML = '';
+      }, 5000);
+      
+      // Scroll to message
+      container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+    
+    // File input change event to show selected file info
+    document.getElementById('file').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (file) {
+        const sizeInMB = (file.size / (1024 * 1024)).toFixed(2);
+        const fileInfo = document.querySelector('.file-info');
+        fileInfo.innerHTML = `Selected: ${file.name} (${sizeInMB} MB)<br>Supported formats: PDF, PNG, JPG, JPEG, DOC, DOCX (Max size: 16MB)`;
+      }
+    });
+  </script>
+
+</body>
+</html>

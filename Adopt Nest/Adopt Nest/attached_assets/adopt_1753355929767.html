@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Adopt a Pet</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      background: url('https://cdn.wallpapersafari.com/32/78/dTuctf.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+    }
+
+    header {
+      background-color: rgba(255, 145, 77, 0.9);
+      color: white;
+      padding: 1.5rem;
+      text-align: center;
+    }
+
+    section {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 2rem;
+    }
+
+    form#adoptionForm {
+      background: rgba(255, 255, 255, 0.95);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+
+    form#adoptionForm h2 {
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    form#adoptionForm label {
+      display: block;
+      margin-top: 1rem;
+      font-weight: bold;
+    }
+
+    form#adoptionForm input,
+    form#adoptionForm textarea {
+      width: 100%;
+      padding: 0.8rem;
+      margin-top: 0.3rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+    }
+
+    form#adoptionForm textarea {
+      resize: vertical;
+      min-height: 100px;
+    }
+
+    form#adoptionForm button {
+      margin-top: 1.5rem;
+      background-color: #ff914d;
+      color: white;
+      border: none;
+      padding: 0.9rem 1.5rem;
+      font-size: 1rem;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    form#adoptionForm button:hover {
+      background-color: #e67e22;
+    }
+
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>🐶 Pet Adoption Request</h1>
+  </header>
+
+  <section>
+    <form id="adoptionForm">
+      <h2>Adoption Application</h2>
+
+      <label for="name">Your Name</label>
+      <input type="text" id="name" name="name" required>
+
+      <label for="email">Your Email</label>
+      <input type="email" id="email" name="email" required>
+
+      <label for="pet_id">Pet ID</label>
+      <input type="text" id="pet_id" name="pet_id" required>
+
+      <label for="reason">Why do you want to adopt?</label>
+      <textarea id="reason" name="reason" required></textarea>
+
+      <button type="submit">Submit Request</button>
+    </form>
+  </section>
+
+  <footer>
+    <p>© 2025 PetAdopt Inc.</p>
+  </footer>
+
+  <script>
+    document.getElementById('adoptionForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const name = document.querySelector('#name').value;
+      const email = document.querySelector('#email').value;
+      const pet_id = document.querySelector('#pet_id').value;
+      const reason = document.querySelector('#reason').value;
+
+      fetch('http://localhost:5000/submit_adoption', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ name, email, pet_id, reason })
+      })
+      .then(response => response.json())
+      .then(data => {
+        alert(data.message);
+        document.getElementById('adoptionForm').reset();
+      })
+      .catch(error => console.error('Error:', error));
+    });
+  </script>
+
+</body>
+</html>

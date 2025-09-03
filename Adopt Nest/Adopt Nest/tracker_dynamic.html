@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Adoption Tracker - AdoptNest</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    html, body {
+      height: 100%;
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      background: url('https://wallpapercave.com/wp/wp10340135.jpg') no-repeat center center fixed;
+      background-size: cover;
+      color: #333;
+    }
+
+    header {
+      background-color: rgba(255, 145, 77, 0.9);
+      color: white;
+      text-align: center;
+      padding: 1.5rem;
+    }
+
+    .nav-links {
+      margin-top: 1rem;
+      text-align: center;
+    }
+
+    .nav-links a {
+      color: white;
+      text-decoration: none;
+      margin: 0 1rem;
+      padding: 0.5rem 1rem;
+      border-radius: 4px;
+      background: rgba(255, 255, 255, 0.2);
+      transition: background 0.3s;
+    }
+
+    .nav-links a:hover {
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    main {
+      flex: 1;
+      max-width: 800px;
+      margin: 2rem auto;
+      background-color: rgba(255, 255, 255, 0.95);
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .search-form {
+      text-align: center;
+      margin-bottom: 2rem;
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+    }
+
+    .search-form h2 {
+      margin-bottom: 1rem;
+      color: #333;
+    }
+
+    .search-form input {
+      padding: 0.8rem;
+      font-size: 1rem;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      margin-right: 0.5rem;
+      width: 200px;
+    }
+
+    .search-form button {
+      padding: 0.8rem 1.5rem;
+      background-color: #ff914d;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: background-color 0.3s;
+    }
+
+    .search-form button:hover {
+      background-color: #e67e22;
+    }
+
+    .search-form button:disabled {
+      background-color: #ccc;
+      cursor: not-allowed;
+    }
+
+    .tracker {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin-top: 2rem;
+    }
+
+    .tracker::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 10%;
+      right: 10%;
+      height: 4px;
+      background: #ccc;
+      z-index: 0;
+    }
+
+    .step {
+      z-index: 1;
+      width: 20%;
+      text-align: center;
+      position: relative;
+    }
+
+    .step .circle {
+      width: 40px;
+      height: 40px;
+      background-color: #ccc;
+      border-radius: 50%;
+      margin: 0 auto 0.5rem;
+      line-height: 40px;
+      color: white;
+      font-weight: bold;
+      font-size: 1.1rem;
+    }
+
+    .step.active .circle {
+      background-color: #ffc107;
+      color: #333;
+    }
+
+    .step.completed .circle {
+      background-color: #28a745;
+    }
+
+    .step.rejected .circle {
+      background-color: #dc3545;
+    }
+
+    .step label {
+      display: block;
+      font-size: 0.9rem;
+      font-weight: bold;
+    }
+
+    .request-details {
+      margin-top: 2rem;
+      padding: 1.5rem;
+      background: #f8f9fa;
+      border-radius: 8px;
+      border-left: 4px solid #ff914d;
+    }
+
+    .message {
+      padding: 1rem;
+      margin-bottom: 1rem;
+      border-radius: 8px;
+      font-weight: 500;
+    }
+
+    .success {
+      background-color: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .error {
+      background-color: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .info {
+      background-color: #d1ecf1;
+      color: #0c5460;
+      border: 1px solid #bee5eb;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 0.25rem;
+      font-size: 0.875rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+
+    .status-pending {
+      background-color: #fff3cd;
+      color: #856404;
+    }
+
+    .status-approved {
+      background-color: #d4edda;
+      color: #155724;
+    }
+
+    .status-rejected {
+      background-color: #f8d7da;
+      color: #721c24;
+    }
+
+    footer {
+      background-color: #333;
+      color: white;
+      text-align: center;
+      padding: 1rem;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>📦 Track Adoption Process</h1>
+    <div class="nav-links">
+      <a href="/">Home</a>
+      <a href="/browse.html">Browse Pets</a>
+      <a href="/adopt.html">Adopt</a>
+      <a href="/health.html">Health Records</a>
+      <a href="/blog.html">Blog</a>
+      <a href="/admin/login">Admin</a>
+    </div>
+  </header>
+
+  <main>
+    <div class="search-form">
+      <h2>Enter Your Details to Track Adoption Status</h2>
+      <form id="trackingForm">
+        <input type="email" id="email" placeholder="Your Email" required>
+        <input type="text" id="pet_id" placeholder="Pet ID (e.g., P001)" required>
+        <button type="submit">Track Status</button>
+      </form>
+    </div>
+
+    <div id="messageContainer"></div>
+
+    <div id="trackingResults" class="hidden">
+      <h2>Adoption Progress</h2>
+      <div class="tracker">
+        <div class="step" id="step1">
+          <div class="circle">1</div>
+          <label>Application Submitted</label>
+        </div>
+        <div class="step" id="step2">
+          <div class="circle">2</div>
+          <label>Under Review</label>
+        </div>
+        <div class="step" id="step3">
+          <div class="circle">3</div>
+          <label>Decision Made</label>
+        </div>
+        <div class="step" id="step4">
+          <div class="circle">4</div>
+          <label>Final Process</label>
+        </div>
+        <div class="step" id="step5">
+          <div class="circle">5</div>
+          <label>Completed</label>
+        </div>
+      </div>
+
+      <div class="request-details" id="requestDetails">
+        <!-- Details will be populated by JavaScript -->
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2025 AdoptNest Inc.</p>
+  </footer>
+
+  <script>
+    document.getElementById('trackingForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const email = document.getElementById('email').value;
+      const pet_id = document.getElementById('pet_id').value;
+      const submitBtn = document.querySelector('button[type="submit"]');
+      const messageContainer = document.getElementById('messageContainer');
+      const trackingResults = document.getElementById('trackingResults');
+
+      // Show loading state
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Searching...';
+      messageContainer.innerHTML = '';
+      trackingResults.classList.add('hidden');
+
+      // Fetch adoption requests for this email and pet_id
+      fetch('/get_requests')
+      .then(response => response.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          const userRequest = data.find(request => 
+            request.email.toLowerCase() === email.toLowerCase() && 
+            request.pet_id.toLowerCase() === pet_id.toLowerCase()
+          );
+
+          if (userRequest) {
+            displayTrackingInfo(userRequest);
+            trackingResults.classList.remove('hidden');
+          } else {
+            messageContainer.innerHTML = `
+              <div class="message error">
+                ❌ No adoption request found for email "${email}" and Pet ID "${pet_id}".
+                <br><small>Please check your details or <a href="/adopt.html">submit a new request</a>.</small>
+              </div>
+            `;
+          }
+        } else {
+          messageContainer.innerHTML = `
+            <div class="message error">
+              ❌ Unable to fetch adoption requests. Please try again later.
+            </div>
+          `;
+        }
+      })
+      .catch(error => {
+        console.error('Error:', error);
+        messageContainer.innerHTML = `
+          <div class="message error">
+            ❌ Network error. Please check your connection and try again.
+          </div>
+        `;
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Track Status';
+      });
+    });
+
+    function displayTrackingInfo(request) {
+      const status = request.status.toLowerCase();
+      const requestDate = new Date(request.request_date).toLocaleDateString();
+      const updatedDate = new Date(request.updated_date).toLocaleDateString();
+
+      // Reset all steps
+      document.querySelectorAll('.step').forEach(step => {
+        step.className = 'step';
+      });
+
+      // Update steps based on status
+      document.getElementById('step1').classList.add('completed');
+
+      if (status === 'pending') {
+        document.getElementById('step2').classList.add('active');
+      } else if (status === 'approved') {
+        document.getElementById('step2').classList.add('completed');
+        document.getElementById('step3').classList.add('completed');
+        document.getElementById('step4').classList.add('active');
+      } else if (status === 'rejected') {
+        document.getElementById('step2').classList.add('completed');
+        document.getElementById('step3').classList.add('rejected');
+      }
+
+      // Display request details
+      const statusBadgeClass = `status-${status}`;
+      const statusText = status.charAt(0).toUpperCase() + status.slice(1);
+      
+      document.getElementById('requestDetails').innerHTML = `
+        <h3>Request Details</h3>
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 1rem;">
+          <div>
+            <strong>Request ID:</strong> #${request.id}<br>
+            <strong>Pet ID:</strong> ${request.pet_id}<br>
+            <strong>Applicant:</strong> ${request.name}<br>
+            <strong>Email:</strong> ${request.email}
+          </div>
+          <div>
+            <strong>Status:</strong> <span class="status-badge ${statusBadgeClass}">${statusText}</span><br>
+            <strong>Submitted:</strong> ${requestDate}<br>
+            <strong>Last Updated:</strong> ${updatedDate}
+          </div>
+        </div>
+        <div style="margin-top: 1rem;">
+          <strong>Application Reason:</strong><br>
+          <em>"${request.reason}"</em>
+        </div>
+        ${getStatusMessage(status)}
+      `;
+    }
+
+    function getStatusMessage(status) {
+      switch(status) {
+        case 'pending':
+          return `
+            <div class="message info" style="margin-top: 1rem;">
+              📋 Your application is currently under review. Our team will contact you soon with updates.
+            </div>
+          `;
+        case 'approved':
+          return `
+            <div class="message success" style="margin-top: 1rem;">
+              🎉 Congratulations! Your adoption request has been approved. We will contact you soon to arrange the next steps.
+            </div>
+          `;
+        case 'rejected':
+          return `
+            <div class="message error" style="margin-top: 1rem;">
+              😔 Unfortunately, your adoption request was not approved this time. You're welcome to apply for other pets.
+            </div>
+          `;
+        default:
+          return '';
+      }
+    }
+  </script>
+
+</body>
+</html>
